@@ -1,0 +1,25 @@
+{
+  "name": "onlineshopbackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ingelmarvin/OnlineShopBackend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ingelmarvin/OnlineShopBackend/issues"
+  },
+  "homepage": "https://github.com/ingelmarvin/OnlineShopBackend#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nedb": "^1.8.0",
+    "uuid": "^8.3.2"
+  }
+}

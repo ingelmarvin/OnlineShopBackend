@@ -1,0 +1,14 @@
+GET http://localhost:3000/products
+
+###
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "title": "product3",
+    "description": "testdescription",
+    "imgpath": "images/productimage.png"
+}
+
+###
