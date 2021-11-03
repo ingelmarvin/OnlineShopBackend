@@ -6,9 +6,30 @@ POST http://localhost:3000/products
 Content-Type: application/json
 
 {
-    "title": "product3",
-    "description": "testdescription",
-    "imgpath": "images/productimage.png"
+    "title": "Cashewmilch",
+    "imgpath": "images/09.png",
+    "price": "200"
 }
 
 ###
+
+POST http://localhost:3000/cart
+Content-Type: application/json
+
+{
+    "productid": "KNaPVUV7deZ8jxnO",
+    "userid": "123456789"
+}
+
+###
+
+GET http://localhost:3000/cart
+Content-Type: application/json
+
+{
+    "userid": "123456789"
+}
+
+###
+
+GET http://localhost:3000/invoices
