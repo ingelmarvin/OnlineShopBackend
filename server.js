@@ -44,7 +44,6 @@ app.post('/products', (req, res) => {   //adminbereiche in 2tes programm umlager
     }
 });
 
-
 app.get('/products', (req, res) => {
     db.products.find({}).sort({
         imgpath: 1
@@ -62,7 +61,10 @@ app.get('/products', (req, res) => {
                 message: 'no products found'
             });
         } else {
-            res.json(docs);
+            const products = {
+                Products: docs
+            }
+            res.json(products);
         }
     });
 });
@@ -106,80 +108,42 @@ app.get('/cart', async (req, res) => {
     res.json(products);
 });
 
-app.get('/invoices', async (req, res) => {
-    res.json({
-        "Invoices": [
-          {
-            "ProductName": "Pineapples",
-            "Quantity": 21,
-            "ExtendedPrice": 87.2000,
-            "ShipperName": "Fun Inc.",
-            "ShippedDate": "2015-04-01T00:00:00",
-            "Status": "A"
-          },
-          {
-            "ProductName": "Milk",
-            "Quantity": 4,
-            "ExtendedPrice": 9.99999,
-            "ShipperName": "ACME",
-            "ShippedDate": "2015-02-18T00:00:00",
-            "Status": "B"
-          },
-          {
-            "ProductName": "Canned Beans",
-            "Quantity": 3,
-            "ExtendedPrice": 6.85000,
-            "ShipperName": "ACME",
-            "ShippedDate": "2015-03-02T00:00:00",
-            "Status": "B"
-          },
-          {
-            "ProductName": "Salad",
-            "Quantity": 2,
-            "ExtendedPrice": 8.8000,
-            "ShipperName": "ACME",
-            "ShippedDate": "2015-04-12T00:00:00",
-            "Status": "C"
-          },
-          {
-            "ProductName": "Bread",
-            "Quantity": 1,
-            "ExtendedPrice": 2.71212,
-            "ShipperName": "Fun Inc.",
-            "ShippedDate": "2015-01-27T00:00:00",
-            "Status": "A"
-          }
-        ]
-      });
-});
-
 app.get('/orders', async (req, res) => {
-    console.log("orders");
+    console.log("orders requested");
     res.json({
-        OrdersPosSet : [
+        "Orders": [
             {
-                OrderID : "135",
-                Value : 50,
-                Currency : "€",
-                ProductQuantity : 12,
-                Payed : true
+                "id": "135",
+                "value": 50,
+                "currency": "$",
+                "quantity": 12,
+                "payed": true,
+                "date": "07.11.2021",
+                "time": "07:11",
+                "status": "ordered"
             },
             {
-                OrderID : "711",
-                Value : 18.70,
-                Currency : "€",
-                ProductQuantity : 4,
-                Payed : true
+                "id": "711",
+                "value": 18.70,
+                "currency": "€",
+                "quantity": 4,
+                "payed": true,
+                "date": "13.05.2021",
+                "time": "13:50",
+                "status": "shipped"
             },
             {
-                OrderID : "246",
-                Value : 420.69,
-                Currency : "€",
-                ProductQuantity : 3,
-                Payed : true
+                "id": "246",
+                "value": 420.69,
+                "currency": "€",
+                "quantity": 3,
+                "payed": false,
+                "date": "01.01.2021",
+                "time": "01:01",
+                "status": ""
             }
         ]
-      });
+    });
 });
 
 
@@ -190,7 +154,7 @@ async function getProductsForProductIds(docs, res) {
                 _id: element.productid
             }, (err, docs) => {
                 if (err) {
-                    console.log(err); 
+                    console.log(err);
                     reject(res.json({
                         success: false,
                         message: 'db error'
@@ -238,4 +202,4 @@ async function getCartForUserId(userid, res) {
     })
 }
 
-app.listen(port, () => console.log('listening at port ' + port));
+app.listen(port, () => console.log('Server ready at http://localhost:' + port));
