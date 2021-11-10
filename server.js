@@ -38,7 +38,7 @@ app.get('/userid', (req, res) => {
 
 });
 
-app.post('/products', (req, res) => { //adminbereiche in 2tes programm umlagern
+app.post('/products', (req, res) => { //adminbereiche in 2tes programm umlagern oder mit pw schützen
     if (req.body != undefined) {
         db.products.insert(req.body);
     }
@@ -68,6 +68,9 @@ app.get('/products', (req, res) => {
                 message: 'no products found'
             });
         } else {
+            docs.forEach(element => {
+                element.currency = "€";
+            });
             const products = {
                 Products: docs
             }
@@ -97,9 +100,15 @@ app.get('/orders', (req, res) => {
                 message: 'no orders found'
             });
         } else {
-            res.json({
-                Orders: docs
+            docs.forEach(element => {
+                element.currency = "€";
+                element.quantity = 0;
+                //foreachelement.products.length;
             });
+            const orders = {
+                Orders: docs
+            };
+            return res.json(orders);
         }
     });
 });
@@ -115,44 +124,6 @@ app.get('/cart', async (req, res) => {
     const products = await getProductsForProductIds(docs, res);
     res.json(products);
 });
-
-app.get('/orders', async (req, res) => {
-    console.log("orders requested");
-    res.json({
-        "Orders": [{
-                "id": "135",
-                "value": 50,
-                "currency": "$",
-                "quantity": 12,
-                "payed": true,
-                "date": "07.11.2021",
-                "time": "07:11",
-                "status": "ordered"
-            },
-            {
-                "id": "711",
-                "value": 18.70,
-                "currency": "€",
-                "quantity": 4,
-                "payed": true,
-                "date": "13.05.2021",
-                "time": "13:50",
-                "status": "shipped"
-            },
-            {
-                "id": "246",
-                "value": 420.69,
-                "currency": "€",
-                "quantity": 3,
-                "payed": false,
-                "date": "01.01.2021",
-                "time": "01:01",
-                "status": ""
-            }
-        ]
-    });
-});
-
 
 async function getProductsForProductIds(docs, res) {
     return Promise.all(docs.map(element => {
