@@ -38,9 +38,16 @@ app.get('/userid', (req, res) => {
 
 });
 
-app.post('/products', (req, res) => {   //adminbereiche in 2tes programm umlagern
+app.post('/products', (req, res) => { //adminbereiche in 2tes programm umlagern
     if (req.body != undefined) {
         db.products.insert(req.body);
+    }
+});
+
+app.put('/products', (req, res) => {
+    console.log("products put request");
+    if (req.body != undefined) {
+        console.log(req.body);
     }
 });
 
@@ -69,13 +76,13 @@ app.get('/products', (req, res) => {
     });
 });
 
-app.post('/order', (req, res) => {
+app.post('/orders', (req, res) => {
     if (req.body != undefined) {
         db.orders.insert(req.body);
     }
 });
 
-app.get('/order', (req, res) => {
+app.get('/orders', (req, res) => {
     db.orders.find({}, (err, docs) => {
         if (err) {
             console.log(err);
@@ -90,7 +97,9 @@ app.get('/order', (req, res) => {
                 message: 'no orders found'
             });
         } else {
-            res.json(docs);
+            res.json({
+                Orders: docs
+            });
         }
     });
 });
@@ -102,7 +111,6 @@ app.post('/cart', (req, res) => {
 })
 
 app.get('/cart', async (req, res) => {
-    //getCartForUserId(req.body.userid, res).then(docs => getProductsForProductIds(docs, res).then(products => res.json(products)));
     const docs = await getCartForUserId(req.body.userid, res)
     const products = await getProductsForProductIds(docs, res);
     res.json(products);
@@ -111,8 +119,7 @@ app.get('/cart', async (req, res) => {
 app.get('/orders', async (req, res) => {
     console.log("orders requested");
     res.json({
-        "Orders": [
-            {
+        "Orders": [{
                 "id": "135",
                 "value": 50,
                 "currency": "$",
