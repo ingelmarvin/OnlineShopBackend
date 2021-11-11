@@ -63,6 +63,11 @@ app.put('/products', (req, res) => {
     }
 });
 
+app.delete('/products', (req, res) => {
+    console.log("delete");
+    res.status(200);
+});
+
 app.get('/products', (req, res) => {
     db.products.find({}).sort({
         imgpath: 1
