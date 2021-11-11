@@ -34,20 +34,32 @@ app.get('/', (req, res) => {
     });
 });
 
-app.get('/userid', (req, res) => {
-
-});
-
 app.post('/products', (req, res) => { //adminbereiche in 2tes programm umlagern oder mit pw schützen
-    if (req.body != undefined) {
+    if (req.body !== undefined) {
         db.products.insert(req.body);
+        console.log(req.body);
+        res.status(200).send("Produkt wurde erstellt");
+    } else {
+        res.status(400);
     }
 });
 
 app.put('/products', (req, res) => {
-    console.log("products put request");
-    if (req.body != undefined) {
-        console.log(req.body);
+    try {
+        if (req.body !== undefined) {
+            console.log(req.body);
+            db.products.update({ _id: req.body._id }, req.body, {}, (err, numReplaced) => {
+                if (err) {
+                    res.status(400);
+                } else {
+                    res.status(200).send("Produkt wurde gespeichert");
+                }
+            });
+        } else {
+            res.status(400);
+        }
+    } catch (error) {
+        res.status(400);
     }
 });
 
@@ -103,7 +115,11 @@ app.get('/orders', (req, res) => {
             docs.forEach(element => {
                 element.currency = "€";
                 element.quantity = 0;
-                //foreachelement.products.length;
+                element.value = 0;
+                element.products.forEach(product => {
+                    element.quantity += product.quantity;
+                    element.value += product.price * product.quantity;
+                });
             });
             const orders = {
                 Orders: docs
@@ -120,7 +136,10 @@ app.post('/cart', (req, res) => {
 })
 
 app.get('/cart', async (req, res) => {
-    const docs = await getCartForUserId(req.body.userid, res)
+    if (req.body.userid === undefined) {
+        /// neue id generieren und zurücksenden
+    };
+    const docs = await getCartForUserId(req.body.userid, res);
     const products = await getProductsForProductIds(docs, res);
     res.json(products);
 });

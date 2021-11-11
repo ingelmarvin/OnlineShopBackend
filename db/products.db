@@ -1,4 +1,4 @@
-{"title":"Cashewmilch","description":"testbeschreibung","imgpath":"productimages/09.png","price":2,"_id":"4cTjFlyrJQz4eGYU"}
+{"title":"Cashewmilch","description":"testbeschreibung","price":"4","imgpath":"productimages/09.png","_id":"4cTjFlyrJQz4eGYU"}
 {"title":"Lupinenmilch","description":"testbeschreibung","imgpath":"productimages/08.png","price":2,"_id":"5GGsrQWgvoSsv88z"}
 {"title":"Sojamilch","description":"testbeschreibung","imgpath":"productimages/03.png","price":2,"_id":"DnYhinJSHHOaSssS"}
 {"title":"Hanfmilch","description":"testbeschreibung","imgpath":"productimages/07.png","price":2,"_id":"GVYLzbX1KzFBftGs"}
@@ -7,3 +7,5 @@
 {"title":"Reismilch","description":"testbeschreibung","imgpath":"productimages/06.png","price":2,"_id":"qImCMzbJEnI0NlwC"}
 {"title":"Dinkelmilch","description":"testbeschreibung","imgpath":"productimages/05.png","price":2,"_id":"rzU4np2dSzOBeYJw"}
 {"title":"Mandelmilch","description":"testbeschreibung","imgpath":"productimages/01.png","price":2,"_id":"s5FIZXAKnccds4bl"}
+{"title":"Mandelmilch","description":"testbeschreibung","price":"5","imgpath":"productimages/01.png","_id":"s5FIZXAKnccds4bl"}
+{"title":"Hafermilch","description":"testbeschreibung","price":"3","imgpath":"productimages/02.png","_id":"KNaPVUV7deZ8jxnO"}
