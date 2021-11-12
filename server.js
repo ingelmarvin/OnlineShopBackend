@@ -87,7 +87,6 @@ app.get('/products', (req, res) => {
         } else {
             docs.forEach(element => {
                 element.currency = "€";
-                element.imgpath = "http://localhost:3000/" + element.imgpath;
             });
             const products = {
                 Products: docs
