@@ -65,7 +65,7 @@ app.put('/products', (req, res) => {
 
 app.delete('/products', (req, res) => {
     console.log("delete");
-    res.status(200);
+    res.status(202);
 });
 
 app.get('/products', (req, res) => {
@@ -87,6 +87,7 @@ app.get('/products', (req, res) => {
         } else {
             docs.forEach(element => {
                 element.currency = "€";
+                element.imgpath = "http://localhost:3000/" + element.imgpath;
             });
             const products = {
                 Products: docs
