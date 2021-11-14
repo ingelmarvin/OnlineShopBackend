@@ -59,13 +59,24 @@ app.put('/products', (req, res) => {
             res.status(400);
         }
     } catch (error) {
-        res.status(400);
+        res.status(200);
     }
 });
 
 app.delete('/products', (req, res) => {
-    console.log("delete");
-    res.status(202);
+    if (req.body._id === undefined) {
+        return res.status(400).send("Error beim Löschen des Produktes");
+    }
+    db.products.remove({ _id: req.body._id }, {}, (err, numRemoved) => {
+        if (err) {
+            res.status(400).send("Error beim Löschen des Produktes");
+        } else if (numRemoved === 0) {
+            return res.status(400).send("Produkt wurde nicht gefunden");
+        }
+        else {
+            return res.status(200).send("Produkt erfolgreich gelöscht");
+        }
+    })
 });
 
 app.get('/products', (req, res) => {
@@ -205,3 +216,4 @@ async function getCartForUserId(userid, res) {
 }
 
 app.listen(port, () => console.log('Server ready at http://localhost:' + port));
+
