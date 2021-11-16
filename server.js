@@ -134,7 +134,9 @@ app.get('/orders', (req, res) => {
                 element.value = 0;
                 element.products.forEach(product => {
                     element.quantity += product.quantity;
-                    element.value += product.price * product.quantity;
+                    product.price = product.price * product.quantity;
+                    element.value += product.price;
+                    product.currency = "€";
                 });
             });
             const orders = {
