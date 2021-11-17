@@ -34,13 +34,19 @@ app.get('/', (req, res) => {
     });
 });
 
-app.post('/products', (req, res) => { //adminbereiche in 2tes programm umlagern oder mit pw schützen
-    if (req.body !== undefined) {
-        db.products.insert(req.body);
-        console.log(req.body);
-        res.status(200).send("Produkt wurde erstellt");
-    } else {
-        res.status(400);
+// best practice : adminrouten in 2tes programm umlagern oder mit pw schützen
+
+app.post('/products', (req, res) => {
+    try {
+        if (req.body !== undefined) {
+            db.products.insert(req.body);
+            console.log(req.body);
+            return res.status(200).send("Produkt wurde erstellt");
+        } else {
+            return res.status(400).send("DB Error");
+        }
+    } catch (error) {
+        return res.status(400).send("Internal Server Error");
     }
 });
 
@@ -50,16 +56,16 @@ app.put('/products', (req, res) => {
             console.log(req.body);
             db.products.update({ _id: req.body._id }, req.body, {}, (err, numReplaced) => {
                 if (err) {
-                    res.status(400);
+                    return res.status(400).send();
                 } else {
-                    res.status(200).send("Produkt wurde gespeichert");
+                    return res.status(200).send("Produkt wurde erfolgreich gespeichert");
                 }
             });
         } else {
-            res.status(400);
+            return res.status(400).send("Produkt wurde nicht richtig an den Server übermittelt");
         }
     } catch (error) {
-        res.status(200);
+        return res.status(400).send("Internal Server Error");
     }
 });
 
@@ -134,8 +140,7 @@ app.get('/orders', (req, res) => {
                 element.value = 0;
                 element.products.forEach(product => {
                     element.quantity += product.quantity;
-                    product.price = product.price * product.quantity;
-                    element.value += product.price;
+                    element.value += product.price * product.quantity;
                     product.currency = "€";
                 });
             });
@@ -147,6 +152,25 @@ app.get('/orders', (req, res) => {
     });
 });
 
+app.put('/orders', (req, res) => {
+    try {
+        if (req.body !== undefined) {
+            console.log(req.body);
+            db.orders.update({ _id: req.body._id }, req.body, {}, (err, numReplaced) => {
+                if (err) {
+                    return res.status(400).send();
+                } else {
+                    return res.status(200).send("Bestellung wurde erfolgreich gespeichert");
+                }
+            });
+        } else {
+            return res.status(400).send("Bestellung wurde nicht richtig an den Server übermittelt");
+        }
+    } catch (error) {
+        return res.status(400).send("Internal Server Error");
+    }
+});
+
 app.post('/cart', (req, res) => {
     if (req.body != undefined) {
         db.carts.insert(req.body);
@@ -155,7 +179,8 @@ app.post('/cart', (req, res) => {
 
 app.get('/cart', async (req, res) => {
     if (req.body.userid === undefined) {
-        /// neue id generieren und zurücksenden
+        // TODO: neue id generieren und zurücksenden
+        return res.json({ Error: "User has no id" });
     };
     const docs = await getCartForUserId(req.body.userid, res);
     const products = await getProductsForProductIds(docs, res);
