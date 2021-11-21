@@ -3,10 +3,17 @@ const express = require('express');
 const port = 3000;
 const app = express();
 
+//für fileupload
+const fileUpload = require('express-fileupload')
+app.use(fileUpload({
+    createParentPath: true
+}));
+
 //für sapui5
 var cors = require('cors')
 app.use(cors())
 
+//für json
 app.use(express.static('public'));
 app.use(express.json({
     limit: '10mb'
@@ -14,6 +21,7 @@ app.use(express.json({
 app.use(express.urlencoded({
     extended: false
 }))
+
 
 //database
 const Datastore = require('nedb');
@@ -34,7 +42,7 @@ app.get('/', (req, res) => {
     });
 });
 
-// best practice : adminrouten in 2tes programm umlagern oder mit pw schützen
+// best practice : adminrouten in 2tes programm umlagern oder mit passwort schützen
 
 app.post('/products', (req, res) => {
     try {
@@ -168,6 +176,26 @@ app.put('/orders', (req, res) => {
         }
     } catch (error) {
         return res.status(400).send("Internal Server Error");
+    }
+});
+
+app.post('/productimg', async (req, res) => {
+    console.log(req.body);
+    try {
+        if (!req.files) {
+            console.log("1");
+            return res.status(400).send("Keine Datei hochgeladen");
+        } else {
+            let image = req.files['container-adminspace---createProduct--fileUploader'];
+
+            const imagename = 'productimages/' + image.name
+            image.mv('./public/' + imagename);
+
+            return res.status(200).send({ response: imagename });
+        }
+    } catch (err) {
+        console.log("2");
+        return res.status(500).send(err);
     }
 });
 
