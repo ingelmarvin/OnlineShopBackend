@@ -218,7 +218,7 @@ app.post('/cart', (req, res) => {
 })
 
 app.get('/cart', async (req, res) => {
-    if (!req.params.userid) {
+    if (!req.query.userid) {
         return await res.status(400).send("Userid fehlt");
     }
     const docs = await getCartForUserId(req.params.userid, res);
