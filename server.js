@@ -40,9 +40,11 @@ db.carts.loadDatabase();
 
 //routes
 app.get('/', (req, res) => {
-    res.json({
-        message: "ok"
+    const userid = Str.random(15);
+    return res.json({
+        userid: userid
     });
+
 });
 
 // best practice : adminrouten in 2tes programm umlagern oder mit passwort schützen
@@ -216,13 +218,9 @@ app.post('/cart', (req, res) => {
 })
 
 app.get('/cart', async (req, res) => {
-    if (req.body.userid === undefined) {
-        // TODO: neue id generieren und zurücksenden
-        const userid = Str.random(15);
-        return res.json({
-            userid: userid
-        });
-    };
+    if (!req.body.userid) {
+        return await res.status(400).send("Userid fehlt");
+    }
     const docs = await getCartForUserId(req.body.userid, res);
     const products = await getProductsForProductIds(docs, res);
     res.json(products);
