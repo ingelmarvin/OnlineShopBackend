@@ -22,6 +22,9 @@ app.use(express.urlencoded({
     extended: false
 }))
 
+//für id generierung
+const Str = require('@supercharge/strings')
+
 
 //database
 const Datastore = require('nedb');
@@ -62,7 +65,9 @@ app.put('/products', (req, res) => {
     try {
         if (req.body !== undefined) {
             console.log(req.body);
-            db.products.update({ _id: req.body._id }, req.body, {}, (err, numReplaced) => {
+            db.products.update({
+                _id: req.body._id
+            }, req.body, {}, (err, numReplaced) => {
                 if (err) {
                     return res.status(400).send();
                 } else {
@@ -81,13 +86,14 @@ app.delete('/products', (req, res) => {
     if (req.body._id === undefined) {
         return res.status(400).send("Error beim Löschen des Produktes");
     }
-    db.products.remove({ _id: req.body._id }, {}, (err, numRemoved) => {
+    db.products.remove({
+        _id: req.body._id
+    }, {}, (err, numRemoved) => {
         if (err) {
             res.status(400).send("Error beim Löschen des Produktes");
         } else if (numRemoved === 0) {
             return res.status(400).send("Produkt wurde nicht gefunden");
-        }
-        else {
+        } else {
             return res.status(200).send("Produkt erfolgreich gelöscht");
         }
     })
@@ -164,7 +170,9 @@ app.put('/orders', (req, res) => {
     try {
         if (req.body !== undefined) {
             console.log(req.body);
-            db.orders.update({ _id: req.body._id }, req.body, {}, (err, numReplaced) => {
+            db.orders.update({
+                _id: req.body._id
+            }, req.body, {}, (err, numReplaced) => {
                 if (err) {
                     return res.status(400).send();
                 } else {
@@ -191,7 +199,9 @@ app.post('/productimg', async (req, res) => {
             const imagename = 'productimages/' + image.name
             image.mv('./public/' + imagename);
 
-            return res.status(200).send({ response: imagename });
+            return res.status(200).send({
+                response: imagename
+            });
         }
     } catch (err) {
         console.log("2");
@@ -208,7 +218,10 @@ app.post('/cart', (req, res) => {
 app.get('/cart', async (req, res) => {
     if (req.body.userid === undefined) {
         // TODO: neue id generieren und zurücksenden
-        return res.json({ Error: "User has no id" });
+        const userid = Str.random(15);
+        return res.json({
+            userid: userid
+        });
     };
     const docs = await getCartForUserId(req.body.userid, res);
     const products = await getProductsForProductIds(docs, res);
@@ -271,4 +284,3 @@ async function getCartForUserId(userid, res) {
 }
 
 app.listen(port, () => console.log('Server ready at http://localhost:' + port));
-

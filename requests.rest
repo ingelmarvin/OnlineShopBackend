@@ -69,3 +69,10 @@ Content-Type: application/json
 GET http://localhost:3000/orders
 
 ###
+
+GET http://localhost:3000/cart
+Content-Type: application/json
+
+{
+    "userid":"123456789"
+}
