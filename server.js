@@ -218,10 +218,10 @@ app.post('/cart', (req, res) => {
 })
 
 app.get('/cart', async (req, res) => {
-    if (!req.body.userid) {
+    if (!req.params.userid) {
         return await res.status(400).send("Userid fehlt");
     }
-    const docs = await getCartForUserId(req.body.userid, res);
+    const docs = await getCartForUserId(req.params.userid, res);
     const products = await getProductsForProductIds(docs, res);
     res.json(products);
 });
