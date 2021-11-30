@@ -79,3 +79,25 @@ Content-Type: application/json
 
 ###
 GET http://localhost:3000/cart?userid=123456789
+
+###
+POST http://localhost:3000/orders
+Content-Type: application/json
+
+{
+    "userid":"123456789",
+    "street": "Mainstreet",
+    "streetnr": "69",
+    "zipcode": "18547",
+    "city": "GTown",
+    "firstname": "Jeff",
+    "lastname": "Smith",
+    "products": [
+        {
+            "title": "Brot",
+            "price": 5.5,
+            "quantity": 4,
+            "currency": "€"
+        }
+    ]
+}
