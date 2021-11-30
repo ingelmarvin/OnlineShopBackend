@@ -38,17 +38,20 @@ db.carts = new Datastore('db/carts.db');
 db.carts.loadDatabase();
 
 
+// best practice : adminrouten in 2tes programm umlagern oder mit passwort schützen
+// best practice : nicht einfach req.body übernehmen sondern jedes einzelne feld überprüfen und nur die gewünschten felder zu übernehmen
+
 //routes
 app.get('/', (req, res) => {
-    const userid = Str.random(15);
-    return res.json({
-        userid: userid
-    });
-
+    try {
+        const userid = Str.random(15);
+        return res.json({
+            userid: userid
+        });
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
+    }
 });
-
-// best practice : adminrouten in 2tes programm umlagern oder mit passwort schützen
-// best practice : jede route mit try catch schützen. catch -> res.status(400) und log error in file
 
 app.post('/products', (req, res) => {
     try {
@@ -60,7 +63,7 @@ app.post('/products', (req, res) => {
             return res.status(400).send("DB Error");
         }
     } catch (error) {
-        return res.status(400).send("Internal Server Error");
+        return res.status(500).send("Internal Server Error");
     }
 });
 
@@ -81,131 +84,147 @@ app.put('/products', (req, res) => {
             return res.status(400).send("Produkt wurde nicht richtig an den Server übermittelt");
         }
     } catch (error) {
-        return res.status(400).send("Internal Server Error");
+        return res.status(500).send("Internal Server Error");
     }
 });
 
 app.delete('/products', (req, res) => {
-    if (req.body._id === undefined) {
-        return res.status(400).send("Error beim Löschen des Produktes");
-    }
-    db.products.remove({
-        _id: req.body._id
-    }, {}, (err, numRemoved) => {
-        if (err) {
-            res.status(400).send("Error beim Löschen des Produktes");
-        } else if (numRemoved === 0) {
-            return res.status(400).send("Produkt wurde nicht gefunden");
-        } else {
-            return res.status(200).send("Produkt erfolgreich gelöscht");
+    try {
+        if (req.body._id === undefined) {
+            return res.status(400).send("Error beim Löschen des Produktes");
         }
-    })
+        db.products.remove({
+            _id: req.body._id
+        }, {}, (err, numRemoved) => {
+            if (err) {
+                res.status(400).send("Error beim Löschen des Produktes");
+            } else if (numRemoved === 0) {
+                return res.status(400).send("Produkt wurde nicht gefunden");
+            } else {
+                return res.status(200).send("Produkt erfolgreich gelöscht");
+            }
+        })
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
+    }
 });
 
 app.get('/products', (req, res) => {
-    db.products.find({}).sort({
-        imgpath: 1
-    }).exec((err, docs) => {
-        if (err) {
-            console.log(err);
-            return res.json({
-                success: false,
-                message: 'db error'
-            });
-        } else if (docs.length === 0) {
-            console.log('no products found');
-            return res.json({
-                success: false,
-                message: 'no products found'
-            });
-        } else {
-            docs.forEach(element => {
-                element.currency = "€";
-            });
-            const products = {
-                Products: docs
+    try {
+        db.products.find({}).sort({
+            imgpath: 1
+        }).exec((err, docs) => {
+            if (err) {
+                console.log(err);
+                return res.json({
+                    success: false,
+                    message: 'db error'
+                });
+            } else if (docs.length === 0) {
+                console.log('no products found');
+                return res.json({
+                    success: false,
+                    message: 'no products found'
+                });
+            } else {
+                docs.forEach(element => {
+                    element.currency = "€";
+                });
+                const products = {
+                    Products: docs
+                }
+                res.json(products);
             }
-            res.json(products);
-        }
-    });
+        });
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
+    }
 });
 
 app.post('/orders', (req, res) => {
-    if (req.body) {
-        const date = new Date();
-        const datestring = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-        const timestring = `${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`;
-        let quantity = 0;
-        let value = 0;
-        req.body.products.forEach(element => {
-            quantity += element.quantity ? element.quantity : 1
-            value += element.quantity ? element.quantity * element.price : element.price
-        })
-        const data = {
-            payed: false,
-            sent: false,
-            date: datestring,
-            time: timestring,
-            currency: "€",
-            userid: req.body.userid,
-            quantity: quantity,
-            value: value,
-            address: {
-                street: req.body.street,
-                streetnr: req.body.streetnr,
-                zipcode: req.body.zipcode,
-                city: req.body.city,
-                firstname: req.body.firstname,
-                lastname: req.body.lastname
-            },
-            products: req.body.products
-        };
-        db.orders.insert(data, (err, doc) => {
-            if (err) {
-                res.status(400).send(err);
-            }
-            if (!doc || doc.length === 0) {
-                res.status(400).send("Bestellung konnte nicht erstellt werden");
-            }
-            res.status(200).send();
-        });
+    try {
+        if (req.body) {
+            const date = new Date();
+            const datestring = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+            const timestring = `${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`;
+            let quantity = 0;
+            let value = 0;
+            req.body.products.forEach(element => {
+                quantity += element.quantity ? element.quantity : 1
+                value += element.quantity ? element.quantity * element.price : element.price
+            })
+            const data = {
+                payed: false,
+                sent: false,
+                date: datestring,
+                time: timestring,
+                currency: "€",
+                userid: req.body.userid,
+                quantity: quantity,
+                value: value,
+                address: {
+                    street: req.body.street,
+                    streetnr: req.body.streetnr,
+                    zipcode: req.body.zipcode,
+                    city: req.body.city,
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname
+                },
+                products: req.body.products
+            };
+            db.orders.insert(data, (err, doc) => {
+                if (err) {
+                    res.status(400).send(err);
+                }
+                if (!doc || doc.length === 0) {
+                    res.status(400).send("Bestellung konnte nicht erstellt werden");
+                }
+                res.status(200).send();
+            });
 
-    } else {
-        res.status(400).send("Missing Requestbody");
+        } else {
+            res.status(400).send("Missing Requestbody");
+        }
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
     }
 });
 
 app.get('/orders', (req, res) => {
-    db.orders.find({}, (err, docs) => {
-        if (err) {
-            console.log(err);
-            return res.json({
-                success: false,
-                message: 'db error'
-            });
-        } else if (docs.length === 0) {
-            console.log('no orders found');
-            return res.json({
-                success: false,
-                message: 'no orders found'
-            });
-        } else {
-            docs.forEach(element => {
-                element.currency = "€";
-                element.quantity = 0;
-                element.value = 0;
-                element.products.forEach(product => {
-                    element.quantity += product.quantity;
-                    element.value += product.price * product.quantity;
-                    product.currency = "€";
+    try {
+        db.orders.find({}, (err, docs) => {
+            if (err) {
+                console.log(err);
+                return res.json({
+                    success: false,
+                    message: 'db error'
                 });
-            });
-            const orders = {
-                Orders: docs
-            };
-            return res.json(orders);
-        }
-    });
+            } else if (docs.length === 0) {
+                console.log('no orders found');
+                return res.json({
+                    success: false,
+                    message: 'no orders found'
+                });
+            } else {
+                docs.forEach(element => {
+                    element.currency = "€";
+                    element.quantity = 0;
+                    element.value = 0;
+                    element.products.forEach(product => {
+                        element.quantity += product.quantity;
+                        element.value += product.price * product.quantity;
+                        product.currency = "€";
+                    });
+                });
+                const orders = {
+                    Orders: docs
+                };
+                return res.json(orders);
+            }
+        });
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
+    }
 });
 
 app.put('/orders', (req, res) => {
@@ -225,12 +244,11 @@ app.put('/orders', (req, res) => {
             return res.status(400).send("Bestellung wurde nicht richtig an den Server übermittelt");
         }
     } catch (error) {
-        return res.status(400).send("Internal Server Error");
+        return res.status(500).send("Internal Server Error");
     }
 });
 
 app.post('/productimg', async (req, res) => {
-    console.log(req.body);
     try {
         if (!req.files) {
             console.log("1");
@@ -247,33 +265,43 @@ app.post('/productimg', async (req, res) => {
         }
     } catch (err) {
         console.log("2");
-        return res.status(500).send(err);
+        return res.status(500).send();
     }
 });
 
 app.post('/cart', (req, res) => {
-    if (req.body != undefined) {
-        db.carts.insert(req.body, (err, docs) => {
-            if (err) {
+    try {
+        if (req.body != undefined) {
+            db.carts.insert(req.body, (err, docs) => {
+                if (err) {
+                    return res.status(400).send();
+                }
+                if (docs.length !== 0) {
+                    return res.status(200).send("ok");
+                }
                 return res.status(400).send();
-            }
-            if (docs.length !== 0) {
-                return res.status(200).send("ok");
-            }
-            return res.status(400).send();
-        });
+            });
+        }
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
     }
 })
 
 app.get('/cart', async (req, res) => {
-    if (!req.query.userid) {
-        return await res.status(400).send("Userid fehlt");
+    try {
+        if (!req.query.userid) {
+            return await res.status(400).send("Userid fehlt");
+        }
+        const docs = await getCartForUserId(req.query.userid, res);
+        const products = await getProductsForProductIds(docs, res);
+        return res.json(products);
+    } catch (error) {
+        return res.status(500).send("Internal Server Error");
     }
-    const docs = await getCartForUserId(req.query.userid, res);
-    const products = await getProductsForProductIds(docs, res);
-    return res.json(products);
 });
 
+
+//helfer funktionen
 async function getProductsForProductIds(docs, res) {
     return Promise.all(docs.map(element => {
         return new Promise((resolve) => {
