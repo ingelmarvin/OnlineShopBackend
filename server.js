@@ -216,7 +216,9 @@ app.post('/orders', async (req, res) => {
                 if (!doc || doc.length === 0) {
                     res.status(400).send("Bestellung konnte nicht erstellt werden");
                 }
-                res.status(200).send();
+                res.status(200).json({
+                    orderid: doc._id
+                });
             });
 
         } else {
@@ -333,6 +335,9 @@ app.get('/cart', async (req, res) => {
         }
         const docs = await getCartForUserId(req.query.userid, res);
         const products = await getProductsForProductIds(docs, res);
+        products.forEach(element => {
+            element.price = parseFloat(element.price).toFixed(2);
+        });
         return res.json(products);
     } catch (error) {
         return res.status(500).send("Internal Server Error");
