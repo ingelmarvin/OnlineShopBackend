@@ -217,7 +217,8 @@ app.post('/orders', async (req, res) => {
                     res.status(400).send("Bestellung konnte nicht erstellt werden");
                 }
                 res.status(200).json({
-                    orderid: doc._id
+                    orderid: doc._id,
+                    value: doc.value
                 });
             });
 
