@@ -91,13 +91,8 @@ Content-Type: application/json
     "zipcode": "18547",
     "city": "GTown",
     "firstname": "Jeff",
-    "lastname": "Smith",
-    "products": [
-        {
-            "title": "Brot",
-            "price": 5.5,
-            "quantity": 4,
-            "currency": "€"
-        }
-    ]
+    "lastname": "Smith"
 }
+
+###
+GET http://localhost:3000/orders

@@ -25,9 +25,14 @@ app.use(express.urlencoded({
 //für id generierung
 const Str = require('@supercharge/strings')
 
+//filewriter
+const fs = require('fs')
 
 //database
 const Datastore = require('nedb');
+const {
+    timeStamp
+} = require('console');
 const db = {};
 
 db.products = new Datastore('db/products.db');
@@ -141,7 +146,7 @@ app.get('/products', (req, res) => {
     }
 });
 
-app.post('/orders', (req, res) => {
+app.post('/orders', async (req, res) => {
     try {
         if (req.body) {
             const date = new Date();
@@ -149,10 +154,36 @@ app.post('/orders', (req, res) => {
             const timestring = `${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`;
             let quantity = 0;
             let value = 0;
-            req.body.products.forEach(element => {
-                quantity += element.quantity ? element.quantity : 1
-                value += element.quantity ? element.quantity * element.price : element.price
-            })
+
+            //get products
+            const docs = await getCartForUserId(req.body.userid, res);
+            const products = await getProductsForProductIds(docs, res);
+            let revisedproducts = [];
+            products.sort((a, b) => {
+                a.title - b.title //testen
+            });
+            let previousproduct = {
+                title: ""
+            };
+            products.forEach((element, index) => {
+                const product = {
+                    price: parseFloat(element.price).toFixed(2),
+                    title: element.title,
+                    quantity: element.quantity ? element.quantity : 1,
+                    currency: "€"
+                };
+                if (previousproduct.title !== product.title) {
+                    revisedproducts.push(product);
+                    previousproduct = product;
+                } else {
+                    previousproduct.quantity += product.quantity;
+                }
+                quantity += product.quantity;
+                value += product.quantity * product.price;
+            });
+            value = parseFloat(value).toFixed(2);
+
+            //build order object for db insertion
             const data = {
                 payed: false,
                 sent: false,
@@ -170,8 +201,9 @@ app.post('/orders', (req, res) => {
                     firstname: req.body.firstname,
                     lastname: req.body.lastname
                 },
-                products: req.body.products
+                products: revisedproducts
             };
+
             db.orders.insert(data, (err, doc) => {
                 if (err) {
                     res.status(400).send(err);
@@ -186,6 +218,7 @@ app.post('/orders', (req, res) => {
             res.status(400).send("Missing Requestbody");
         }
     } catch (error) {
+        console.log(error);
         return res.status(500).send("Internal Server Error");
     }
 });
@@ -211,10 +244,11 @@ app.get('/orders', (req, res) => {
                     element.quantity = 0;
                     element.value = 0;
                     element.products.forEach(product => {
-                        element.quantity += product.quantity;
-                        element.value += product.price * product.quantity;
+                        element.quantity += product.quantity ? product.quantity : 1;
+                        element.value += product.price * (product.quantity ? product.quantity : 1);
                         product.currency = "€";
                     });
+                    element.value = parseFloat(element.value).toFixed(2);
                 });
                 const orders = {
                     Orders: docs
@@ -277,7 +311,7 @@ app.post('/cart', (req, res) => {
                     return res.status(400).send();
                 }
                 if (docs.length !== 0) {
-                    return res.status(200).send("ok");
+                    return res.status(200).send();
                 }
                 return res.status(400).send();
             });
@@ -354,6 +388,20 @@ async function getCartForUserId(userid, res) {
                 resolve(docs);
             }
         });
+    })
+}
+
+function logErrorToTextfile(error) {
+    const datestring = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+    const timestring = `${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`;
+    const timestamp = datestring + ":" + timestring;
+    const content = timestamp + error;
+    fs.appendFile('file.log', content, err => {
+        if (err) {
+            console.error(err)
+            return
+        }
+        //done!
     })
 }
 
