@@ -159,8 +159,13 @@ app.post('/orders', async (req, res) => {
             const docs = await getCartForUserId(req.body.userid, res);
             const products = await getProductsForProductIds(docs, res);
             let revisedproducts = [];
+            //sort to delete duplicates
             products.sort((a, b) => {
-                a.title - b.title //testen
+                if (a.title === b.title) {
+                    return 0;
+                } else {
+                    return (a.title > b.title ? 1 : -1)
+                }
             });
             let previousproduct = {
                 title: ""
