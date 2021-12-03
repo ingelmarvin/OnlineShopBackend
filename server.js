@@ -216,10 +216,21 @@ app.post('/orders', async (req, res) => {
                 if (!doc || doc.length === 0) {
                     res.status(400).send("Bestellung konnte nicht erstellt werden");
                 }
-                res.status(200).json({
-                    orderid: doc._id,
-                    value: doc.value
-                });
+                const orderid = doc._id;
+                const ordervalue = doc.value
+                // warenkorb leeren
+                db.carts.remove({
+                    userid: req.body.userid
+                }, {
+                    multi: true
+                }, (err, doc) => {
+                    console.log(err);
+                    console.log(doc);
+                    res.status(200).json({
+                        orderid: orderid,
+                        value: ordervalue
+                    });
+                })
             });
 
         } else {
@@ -334,13 +345,24 @@ app.get('/cart', async (req, res) => {
         if (!req.query.userid) {
             return await res.status(400).send("Userid fehlt");
         }
-        const docs = await getCartForUserId(req.query.userid, res);
-        const products = await getProductsForProductIds(docs, res);
+        const docs = await getCartForUserId(req.query.userid, res).catch(error => {
+            return null;
+        });
+        if (!docs) {
+            return;
+        }
+        const products = await getProductsForProductIds(docs, res).catch(error => {
+            return [];
+        });
         products.forEach(element => {
             element.price = parseFloat(element.price).toFixed(2);
         });
-        return res.json(products);
+        if (products) {
+            return res.json(products);
+        }
+
     } catch (error) {
+        console.log(error.message);
         return res.status(500).send("Internal Server Error");
     }
 });
@@ -359,12 +381,14 @@ async function getProductsForProductIds(docs, res) {
                         success: false,
                         message: 'db error'
                     }));
+                    reject();
                 } else if (docs.length === 0) {
-                    console.log('invalid products found in cart');
+                    console.log('no products found in cart');
                     reject(res.json({
                         success: false,
-                        message: 'invalid products found in cart'
+                        message: 'no products found in cart'
                     }));
+                    reject();
                 } else {
                     element.title = docs[0].title;
                     element.imgpath = docs[0].imgpath;
@@ -392,7 +416,8 @@ async function getCartForUserId(userid, res) {
                 console.log('no products found in cart');
                 reject(res.json({
                     success: false,
-                    message: 'no products found in cart'
+                    message: 'no products found in cart',
+                    products: []
                 }));
             } else {
                 console.log("returning cart");
