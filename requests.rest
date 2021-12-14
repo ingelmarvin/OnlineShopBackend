@@ -23,12 +23,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3000/cart
-Content-Type: application/json
-
-{
-    "userid": "123456789"
-}
+GET http://localhost:3000/cart?userid=123456789
 
 ###
 
