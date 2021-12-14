@@ -338,7 +338,7 @@ app.post('/cart', (req, res) => {
     } catch (error) {
         return res.status(500).send("Internal Server Error");
     }
-})
+});
 
 app.get('/cart', async (req, res) => {
     try {
@@ -363,6 +363,30 @@ app.get('/cart', async (req, res) => {
 
     } catch (error) {
         console.log(error.message);
+        return res.status(500).send("Internal Server Error");
+    }
+});
+
+app.delete('/cart', (req, res) => {
+    try {
+        if (req.body.productid === undefined || req.body.userid === undefined) {
+            return res.status(400).send("Error beim Löschen des Produktes");
+        }
+        db.carts.remove({
+            productid: req.body.productid,
+            userid: req.body.userid
+        }, {
+            multi: true
+        }, (err, numRemoved) => {
+            if (err) {
+                res.status(400).send("Error beim Löschen des Produktes");
+            } else if (numRemoved === 0) {
+                return res.status(400).send("Produkt wurde nicht gefunden");
+            } else {
+                return res.status(200).send("Produkt erfolgreich gelöscht");
+            }
+        })
+    } catch (error) {
         return res.status(500).send("Internal Server Error");
     }
 });
