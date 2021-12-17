@@ -345,11 +345,15 @@ app.get('/cart', async (req, res) => {
         if (!req.query.userid) {
             return await res.status(400).send("Userid fehlt");
         }
+        let end = false;
         const docs = await getCartForUserId(req.query.userid, res).catch(error => {
-            return null;
+            end = true;
         });
-        if (!docs) {
+        if (end) {
             return;
+        }
+        if (!docs || docs.length === 0) {
+            return res.json({}).send();
         }
         const products = await getProductsForProductIds(docs, res).catch(error => {
             return [];
@@ -367,10 +371,11 @@ app.get('/cart', async (req, res) => {
     }
 });
 
-app.delete('/cart', (req, res) => {
+app.post('/cartdelete', (req, res) => {
     try {
+        console.log(req.body.userid, req.body.productid);
         if (req.body.productid === undefined || req.body.userid === undefined) {
-            return res.status(400).send("Error beim Löschen des Produktes");
+            return res.status(400).send("Error beim Löschen des Produktes: userid oder productid ist nicht definiert");
         }
         db.carts.remove({
             productid: req.body.productid,
@@ -417,6 +422,7 @@ async function getProductsForProductIds(docs, res) {
                     element.title = docs[0].title;
                     element.imgpath = docs[0].imgpath;
                     element.price = docs[0].price;
+                    element._id = docs[0]._id;
                     console.log(element.title);
                     resolve(element);
                 }
